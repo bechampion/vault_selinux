@@ -1,13 +1,12 @@
 #module description
 policy_module(vault,1.0.0)
 
-	require {
-		type local_login_t;
-		type var_lib_t;
-		type initrc_t;
-		class sock_file write;
-		class unix_stream_socket connectto;
-	}
+#includes
+require {
+	type local_login_t;
+	type initrc_t;
+	class sock_file write;
+}
 #process type daemon
 type vault_t;
 
@@ -22,13 +21,13 @@ type vault_log_t;
 
 #transition for initrc
 type_transition  initrc_t vault_exec_t : process vault_t;
-	init_daemon_domain(vault_t ,vault_exec_t)
+init_daemon_domain(vault_t ,vault_exec_t)
 logging_log_filetrans(vault_t,vault_log_t,file)
 
 #library/config hooking ,  we might not need this as this is golang
-	libs_use_ld_so(vault_t)
-	libs_use_shared_libs(vault_t)
-	miscfiles_read_localization(vault_t)
+libs_use_ld_so(vault_t)
+libs_use_shared_libs(vault_t)
+miscfiles_read_localization(vault_t)
 files_type(vault_config_t)
 
 #macro to add common syscalls for reading
@@ -37,48 +36,15 @@ read_files_pattern(vault_t,vault_config_t,vault_config_t)
 #interface for logging
 logging_log_file(vault_log_t)
 
-
-
 #AVCs
-	allow vault_t vault_config_t:dir list_dir_perms;
-	allow vault_t vault_log_t:dir setattr;
+allow vault_t vault_config_t:dir list_dir_perms;
+allow vault_t vault_log_t:dir setattr;
 
 #AVC net
-	allow vault_t self:tcp_socket create_stream_socket_perms;
-	corenet_tcp_sendrecv_all_if(vault_t)
-	corenet_tcp_sendrecv_all_nodes(vault_t)
-	corenet_tcp_sendrecv_all_ports(vault_t)
+allow vault_t self:tcp_socket create_stream_socket_perms;
+corenet_tcp_sendrecv_all_if(vault_t)
+corenet_tcp_sendrecv_all_nodes(vault_t)
+corenet_tcp_sendrecv_all_ports(vault_t)
 corenet_tcp_bind_all_nodes(vault_t)
 
 #we need a port type vault to be created
-
-
-
-
-
-
-
-
-
-	create_files_pattern(vault_t,vault_log_t,vault_log_t)
-	append_files_pattern(vault_t,vault_log_t,vault_log_t)
-read_files_pattern(vault_t,vault_log_t,vault_log_t)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
