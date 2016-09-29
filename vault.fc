@@ -1,0 +1,9 @@
+#fc for exec
+/usr/sbin/vault --    gen_context(system_u:object_r:vault_exec_t,s0)
+
+#fc for conf
+/etc/vault(/.*)?          gen_context(system_u:object_r:vault_config_t,s0)
+
+#fc for logs
+/var/log/vault(/.*)?     gen_context(system_u:object_r:vault_log_t,s0)
+
