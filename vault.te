@@ -9,7 +9,7 @@ require {
 }
 userdom_use_user_terminals(vault_t)
 #there's got to be a better way to do this
-gen_require(` type user_home_t ; type user_home_dir_t ; type syslogd_var_run_t ; type sysctl_net_t ; type auditd_log_t ; type unconfined_t; role unconfined_r; ')
+gen_require(` type user_home_t ; type user_home_dir_t ; type syslogd_var_run_t ; type sysctl_net_t ; type auditd_log_t ; type unconfined_t; role unconfined_r; role user_r;')
 domtrans_pattern(unconfined_t, vault_exec_t, vault_t)
 role unconfined_r types vault_t;
 
@@ -55,8 +55,10 @@ logging_log_file(vault_log_t)
 #corenet_tcp_sendrecv_all_ports(vault_t)
 corenet_tcp_bind_all_nodes(vault_t)
 
+#give user type some attributes
+
 #AVCs
-##F
+allow vault_t user_home_dir_t:file *;
 allow vault_t user_home_dir_t:dir *;
 allow vault_t user_home_t:file *;
 allow vault_t vault_config_t:dir list_dir_perms;
