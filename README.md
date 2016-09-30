@@ -52,10 +52,14 @@ systemctl daemon-relad
 
 Usage:
 ```bash
-systemctl start vault.service
-systemctl stop vault.service
-systemctl status vault.service
+service vault start
+service vault stop
+service vault status
 ```
+
+log files:
+* /var/log/vault.log
+* /var/run/vault.pid
 
 
 
