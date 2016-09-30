@@ -24,13 +24,13 @@
 [ "$NETWORKING" = "no" ] && exit 0
 
 exec="/usr/sbin/vault"
-prog=${exec##*/}
-
+user="mysys"
+prog="vault"
 lockfile="/var/lock/subsys/$prog"
 pidfile="/var/run/${prog}.pid"
 logfile="/var/log/${prog}.log"
 sysconfig="/etc/sysconfig/$prog"
-confdir="/etc/vault/vault.conf"
+confdir="/etc/vault/"
 
 [ -f $sysconfig ] && . $sysconfig
 
@@ -39,7 +39,12 @@ start() {
 
     echo -n $"Starting $prog: "
     touch $logfile $pidfile
-    daemon "{ $exec server $OPTIONS -config=$confdir &>> $logfile & }; echo \$! >| $pidfile"
+    chown ${user}: $logfile
+    chown ${user}: $pidfile
+    daemon --user=${user} "{ $exec server -config=$confdir &>> $logfile & }; echo \$! >| $pidfile"
+    ##### init should be done on ansible...
+    #sudo -u mysys VAULT_ADDR='http://localhost:5200'  /usr/sbin/vault init
+    #catch 3 keys , unseal with those 3
 
     RETVAL=$?
     if [ $RETVAL -eq 0 ]; then
@@ -52,7 +57,8 @@ start() {
 
 stop() {
     echo -n $"Stopping $prog: "
-    killproc -p $pidfile $exec 2>> $logfile
+    kill -9 $(cat ${pidfile}) 2>> $logfile
+    rm -rf ${pidfile}
     RETVAL=$?
     [ $RETVAL -eq 0 ] && rm -f $lockfile
     echo
@@ -66,7 +72,7 @@ restart() {
 
 reload() {
     echo -n $"Reloading $prog: "
-    killproc -p $pidfile $exec -HUP
+    kill $pidfile -HUP
     echo
 }
 
@@ -91,6 +97,9 @@ unseal() {
     done
     for key in $KEYS; do $exec unseal $CERT $key >> $logfile ; done
 }
+init() { 
+    $exec init >> $logfile
+}
 
 seal() {
     $exec seal $CERT >> $logfile
@@ -102,7 +111,6 @@ case "$1" in
         $1
         ;;
     stop)
-        rh_status_q || exit 0
         $1
         ;;
     restart)
@@ -121,6 +129,9 @@ case "$1" in
     seal)
         $1
         ;;
+    init)
+	$1
+	;;
     *)
         echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|unseal|seal}"
         exit 2

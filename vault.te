@@ -9,7 +9,7 @@ require {
 }
 userdom_use_user_terminals(vault_t)
 #there's got to be a better way to do this
-gen_require(` type kernel_t ; type user_home_t ; type user_home_dir_t ; type syslogd_var_run_t ; type sysctl_net_t ; type auditd_log_t ; type unconfined_t; role unconfined_r; role user_r;')
+gen_require(` type net_conf_t ; type kernel_t ; type user_home_t ; type user_home_dir_t ; type syslogd_var_run_t ; type sysctl_net_t ; type auditd_log_t ; type unconfined_t; role unconfined_r; role user_r;')
 domtrans_pattern(unconfined_t, vault_exec_t, vault_t)
 role unconfined_r types vault_t;
 
@@ -80,3 +80,9 @@ allow vault_t vault_port_t:tcp_socket *;
 
 ### issues with mlock and swap
 allow vault_t self:capability ipc_lock;
+
+##service account
+allow vault_t self:udp_socket *;
+allow vault_t net_conf_t:file *;
+
+
