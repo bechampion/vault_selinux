@@ -42,6 +42,24 @@ restorecon -r /usr/sbin/vault
 
 This goes to uncofined when you remove the module so no issues here.
 
+#Init files
+```bash
+cp vault  /etc/init.d
+mkdir /etc/vault && cp vault.conf /etc/vault
+chkconfig --add vault
+systemctl daemon-relad
+```
+
+Usage:
+```bash
+systemctl start vault.service
+systemctl stop vault.service
+systemctl status vault.service
+```
+
+
+
+
 
 
 
