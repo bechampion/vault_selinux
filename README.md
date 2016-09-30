@@ -35,4 +35,13 @@ semodule -r vault
 ```
 and you're clean.
 
+Relabel the vault binary with
+```bash
+restorecon -r /usr/sbin/vault
+```
+
+This goes to uncofined when you remove the module so no issues here.
+
+
+
 
