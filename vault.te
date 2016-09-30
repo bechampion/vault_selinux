@@ -2,16 +2,14 @@
 policy_module(vault,1.0.0)
 
 #includes
-#g recommends remove
 require {
 	type local_login_t;
 	type initrc_t;
 	class sock_file write;
 }
-gen_require(`
-        type unconfined_t;
-	type unconfined_r;
-')
+userdom_use_user_terminals(vault_t)
+#there's got to be a better way to do this
+gen_require(` type user_home_t ; type user_home_dir_t ; type syslogd_var_run_t ; type sysctl_net_t ; type auditd_log_t ; type unconfined_t; role unconfined_r; ')
 domtrans_pattern(unconfined_t, vault_exec_t, vault_t)
 role unconfined_r types vault_t;
 
@@ -32,8 +30,8 @@ type vault_log_t;
 type vault_port_t;
 
 #interface to make port available
-#g recommends corenet_unreserved_port(vault_port_t)
 corenet_port(vault_port_t)
+#
 ###unfortunatelly so far there's now way to do portcon from module policy def
 #so we need to do it from shell or CIL
 #so after installing the module with
@@ -42,8 +40,7 @@ corenet_port(vault_port_t)
 #semanage port -a -t vault_port_t -p tcp 5200
 
 #transition for initrc
-#g recommends remove
-type_transition  initrc_t vault_exec_t : process vault_t;
+######type_transition  initrc_t vault_exec_t : process vault_t;
 
 init_daemon_domain(vault_t ,vault_exec_t)
 logging_log_filetrans(vault_t,vault_log_t,file)
@@ -52,8 +49,7 @@ logging_log_filetrans(vault_t,vault_log_t,file)
 libs_use_ld_so(vault_t)
 libs_use_shared_libs(vault_t)
 miscfiles_read_localization(vault_t)
-#g recommends files_config_file(vault_config_t)
-files_type(vault_config_t)
+files_config_file(vault_config_t)
 
 #macro to add common syscalls for reading
 read_files_pattern(vault_t,vault_config_t,vault_config_t)
@@ -66,13 +62,25 @@ logging_log_file(vault_log_t)
 #corenet_tcp_sendrecv_all_if(vault_t)
 #corenet_tcp_sendrecv_all_nodes(vault_t)
 #corenet_tcp_sendrecv_all_ports(vault_t)
-#corenet_tcp_bind_all_nodes(vault_t)
+corenet_tcp_bind_all_nodes(vault_t)
 
 #AVCs
+##F
+allow vault_t user_home_dir_t:dir *;
+allow vault_t user_home_t:file *;
 allow vault_t vault_config_t:dir list_dir_perms;
 allow vault_t vault_log_t:dir setattr;
-#allow vault_t self:tcp_socket create_stream_socket_perms;
-#allow vault_t vault_port_t:tcp_socket name_bind;
-
-
+allow vault_t auditd_log_t:dir search;
+allow vault_t syslogd_var_run_t:dir search;
+##N
+allow vault_t self:netlink_route_socket create;
+allow vault_t self:tcp_socket *;
+allow vault_t sysctl_net_t:file read;
+allow vault_t self:unix_dgram_socket *;
+allow vault_t sysctl_net_t:dir search;
+allow vault_t self:capability net_admin;
+allow vault_t self:netlink_route_socket bind;
+allow vault_t sysctl_net_t:file open;
+allow vault_t syslogd_var_run_t:sock_file write;
+allow vault_t vault_port_t:tcp_socket *;
 #we need a port type vault to be created
