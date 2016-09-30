@@ -24,7 +24,7 @@
 [ "$NETWORKING" = "no" ] && exit 0
 
 exec="/usr/sbin/vault"
-user="mysys"
+user="vault"
 prog="vault"
 lockfile="/var/lock/subsys/$prog"
 pidfile="/var/run/${prog}.pid"
