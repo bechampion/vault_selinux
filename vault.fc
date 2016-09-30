@@ -6,4 +6,6 @@
 
 #fc for logs
 /var/log/vault(/.*)?     gen_context(system_u:object_r:vault_log_t,s0)
+/var/log/vault.log    gen_context(system_u:object_r:vault_log_t,s0)
+/var/run/vault.pid     gen_context(system_u:object_r:vault_log_t,s0)
 
