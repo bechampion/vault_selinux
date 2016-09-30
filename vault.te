@@ -13,20 +13,11 @@ gen_require(` type user_home_t ; type user_home_dir_t ; type syslogd_var_run_t ;
 domtrans_pattern(unconfined_t, vault_exec_t, vault_t)
 role unconfined_r types vault_t;
 
-
 #process type daemon
 type vault_t;
-
-#file type for the executable
 type vault_exec_t;
-
-#type for config files
 type vault_config_t;
-
-#type for logging
 type vault_log_t;
-
-#type port tcp
 type vault_port_t;
 
 #interface to make port available
@@ -83,4 +74,3 @@ allow vault_t self:netlink_route_socket bind;
 allow vault_t sysctl_net_t:file open;
 allow vault_t syslogd_var_run_t:sock_file write;
 allow vault_t vault_port_t:tcp_socket *;
-#we need a port type vault to be created
